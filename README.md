@@ -13,10 +13,10 @@ Typical usage:
 ```python
 from monday_library import Monday as M
 api_key = "...."
-Monday = M(api_key)
-pulse = Monday.GetPulse(123)
+dapulse = M(api_key)
+pulse = dapulse.GetPulse(123)
 try:
-	Monday.SetColumnValue(pulse,"something",1)
+	dapulse.SetColumnValue(pulse,"something",1)
 except ColumnNotFound:
 	print("scary, missing column")
 ```
