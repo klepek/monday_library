@@ -1,2 +1,1 @@
-# monday_library
-Python library for Monday.com (formerly dapulse)
+skripty na vyrobu reportu
