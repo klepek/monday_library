@@ -16,7 +16,7 @@ api_key = "...."
 dapulse = M(api_key)
 pulse = dapulse.GetPulse(123)
 try:
-	dapulse.SetColumnValue(pulse,"something",1)
+	dapulse.PutColumnValue(pulse,"something",1)
 except ColumnNotFound:
 	print("scary, missing column")
 ```
@@ -32,7 +32,8 @@ PulseNotFound - Pulse not found
 
 Status:
 - [X] Get Pulse  
-- [ ] WIP: Get Pulse columns  
-- [ ] WIP: Update column for given pulse  
+- [X] Get Pulse columns  
+- [X] Update column for given pulse  
+- [ ] Make better library  
 - [ ] Write documentation
-- [ ] Write tests
+- [ ] Write tests  
