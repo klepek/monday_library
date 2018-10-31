@@ -1,4 +1,4 @@
-Monday.com (formerly DaPulse) library
+Monday.com (formerly DaPulse) library for Python
 
 Api is described here: https://developers.monday.com
 
