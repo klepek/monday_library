@@ -6,7 +6,7 @@ Api key can be obtained based on instructions there.
 
 I have created this in order to process data from Redmine (where my developers track their stuff) and Monday/DaPulse (where management/customer manages their wishes)
 
-This is not 1:1 implementation of Monday API (quite general), it is more client focused (as you do not want to iterate over columns, boards and look for correct board_id and column_id and follow with update to it, you want to update column for that pulse)
+This is not 1:1 implementation of Monday API (they have it universal), this is more client focused (as you do not want to iterate over columns, boards and look for correct board_id and column_id and follow with update to it, you want to update column for that pulse)
 
 Typical usage:
 
