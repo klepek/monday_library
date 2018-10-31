@@ -8,6 +8,8 @@ I have created this in order to process data from Redmine (where my developers t
 
 This is not 1:1 implementation of Monday API (they have it universal), this is more client focused (as you do not want to iterate over columns, boards and look for correct board_id and column_id and follow with update to it, you want to update column for that pulse)
 
+Code may be ugly (and probably is, but is working for me).
+
 Typical usage:
 
 ```python
