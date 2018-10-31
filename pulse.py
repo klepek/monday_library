@@ -1,18 +1,31 @@
 class Pulse:
 	id = 0
-	md_od = 0
-	md_do = 0
-	real_md = 0
 	name = ""
-	board=0
+	board_id=0
+	columns = {}
 
-	def __init__(self,id, name, board, url):
+	def __init__(self,id, name, board_id, url):
 		self.id=id
 		self.name=name
 		self.url=url
-		self.board=board
+		self.board_id=board_id
 
-	def setMDs(self, md_od, md_do):
-		self.md_od=md_od
-		self.md_do=md_do
-	
+	def AddColumn(self, column_id, column_name, column_type, raw):
+		self.columns[column_name] = {
+				'id': column_id,
+				'name': column_name,
+				'type': column_type,
+				'url': "/columns/"+str(column_id)+"/"+column_type+".json"
+				}
+
+	def GetColumn(self, column_name):
+		try:
+			return self.columns[column_name]
+		except AttributeError:
+			raise ColumnNotFound("column "+column_name+" does not exists")
+
+	def GetColumnValue(self, column_name):
+		try:
+			return self.columns[column_name]['value']
+		except AttributeError:
+			raise AttributeError("value not found for column "+column_name)

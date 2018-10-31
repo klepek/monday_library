@@ -9,3 +9,6 @@ class ColumnNotFound(Exception):
 
 class PulseNotFound(Exception):
 	pass
+
+class PaymentRequired(Exception):
+	pass
