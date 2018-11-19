@@ -10,12 +10,13 @@ class Pulse:
 		self.url=url
 		self.board_id=board_id
 
-	def AddColumn(self, column_id, column_name, column_type, raw):
+	def AddColumn(self, column_id, column_name, column_type, value):
 		self.columns[column_name] = {
 				'id': column_id,
 				'name': column_name,
 				'type': column_type,
-				'url': "/columns/"+str(column_id)+"/"+column_type+".json"
+				'url': "/columns/"+str(column_id)+"/"+column_type+".json",
+				'value':value,
 				}
 
 	def GetColumn(self, column_name):
@@ -23,6 +24,7 @@ class Pulse:
 			return self.columns[column_name]
 		except AttributeError:
 			raise ColumnNotFound("column "+column_name+" does not exists")
+
 
 	def GetColumnValue(self, column_name):
 		try:
