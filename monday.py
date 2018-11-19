@@ -15,28 +15,46 @@ class Monday(object):
 		self.api_key_end="?"+self.api_key
 
 	def GetPulse(self,id):
-		#url = "https://api.monday.com:443/v1/pulses/"+str(id)+".json?api_key=..."
-		url = self.monday_url+"/pulses/"+str(id)+self.api_key_end
-		#print(url)
-		r = requests.get(url)
-		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code))
-		data = r.json()
-		pulse = Pulse(data['id'],data['name'],data['board_id'],data['url'])
-		for i in self.GetBoardColumns(pulse.board_id):
-			value = self.GetPulseColValue(pulse, i['id'])
-			pulse.AddColumn(i['id'], i['title'], i['type'], value)
-		self.pulses[pulse.id]=pulse
-		return (pulse)
+		try:
+			value = self.pulses[id]
+			return value
+		except KeyError:
+			print("pulse: "+str(id)+" not in cache :/")
+			# Key is not present
+			#url = "https://api.monday.com:443/v1/pulses/"+str(id)+".json?api_key=..."
+			url = self.monday_url+"/pulses/"+str(id)+self.api_key_end
+			#print(url)
+			r = requests.get(url)
+			if r.status_code != 200:
+				raise AccessErrorException("Status code: "+str(r.status_code)+ " for url: "+url)
+			data = r.json()
+			pulse = Pulse(data['id'],data['name'],data['board_id'],data['url'])
+			for i in self.GetBoardColumns(pulse.board_id):
+				value = self.GetPulseColValue(pulse, i['id'], i['type'])
+#				print("pulse.AddColumn("+str(i['id'])+", "+i['title']+", "+i['type']+","+str(value)+")")
+				pulse.AddColumn(i['id'], i['title'], i['type'], value)
+			self.pulses[pulse.id]=pulse
+			return pulse
 
-	def GetPulseColValue(self, pulse, column_id):
+	def GetPulseColValue(self, pulse, column_id, column_type):
 		# https://api.monday.com:443/v1/boards/board_id/columns/numbers0/value.json?pulse_id=pulse_id&return_as_array=true&api_key=...
 		url = self.monday_url+"/boards/"+str(pulse.board_id)+"/columns/"+column_id+"/value.json?pulse_id="+str(pulse.id)+"&return_as_array=false&"+self.api_key
 		#print(url)
 		r = requests.get(url)
 		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code))
+			raise AccessErrorException("Status code: "+str(r.status_code)+ " for url: "+url)
 		data = r.json()
+		# lets see what we got
+		if column_type=="link":
+			try:
+				return data['value'].get('url')
+			except:
+				return data['value']
+		if column_type=="color":
+			try:
+				return data['value'].get('index')
+			except:
+				return data['value']
 		return data['value']
 
 	def GetBoard(self, id):
