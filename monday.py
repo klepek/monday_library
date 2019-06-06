@@ -19,7 +19,7 @@ class Monday(object):
 			value = self.pulses[id]
 			return value
 		except KeyError:
-			print("pulse: "+str(id)+" not in cache :/")
+			#print("pulse: "+str(id)+" not in cache :/")
 			# Key is not present
 			#url = "https://api.monday.com:443/v1/pulses/"+str(id)+".json?api_key=..."
 			url = self.monday_url+"/pulses/"+str(id)+self.api_key_end
@@ -92,7 +92,7 @@ class Monday(object):
 		#print(url)
 		r = requests.get(url)
 		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code))
+			raise AccessErrorException("Status code: "+str(r.status_code)+" "+url)
 		data = r.json()
 		return data
 

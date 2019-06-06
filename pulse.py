@@ -3,6 +3,7 @@ class Pulse:
 	name = ""
 	board_id=0
 	columns = {}
+	columnsId = {}
 
 	def __init__(self,id, name, board_id, url):
 		self.id=id
@@ -18,6 +19,14 @@ class Pulse:
 				'url': "/columns/"+str(column_id)+"/"+column_type+".json",
 				'value':value,
 				}
+		self.columnsId[column_id] = {
+			'id': column_id,
+			'name': column_name,
+			'type': column_type,
+			'url': "/columns/"+str(column_id)+"/"+column_type+".json",
+			'value':value,
+		}
+
 
 	def GetColumn(self, column_name):
 		try:
@@ -31,3 +40,9 @@ class Pulse:
 			return self.columns[column_name]['value']
 		except AttributeError:
 			raise AttributeError("value not found for column "+column_name)
+
+	def GetColumnValuebyId(self, column_id):
+		try:
+			return self.columnsId[column_id]
+		except AttributeError:
+			raise AttributeError("value not found for column "+column_id)
