@@ -1,6 +1,7 @@
 Monday.com (formerly DaPulse) library for Python
 
 Api is described here: https://monday.com/developers/v2
+NOTE: v1 api can be found in branch v1_api
 
 Api key can be obtained based on instructions there.
 
