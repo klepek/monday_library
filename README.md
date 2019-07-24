@@ -1,10 +1,10 @@
 Monday.com (formerly DaPulse) library for Python
 
-Api is described here: https://developers.monday.com
+Api is described here: https://monday.com/developers/v2
 
 Api key can be obtained based on instructions there.
 
-I have created this in order to process data from Redmine (where my developers track their stuff) and Monday/DaPulse (where management/customer manages their wishes)
+I have created this in order to work with data in Monday/DaPulse from scripts
 
 This is not 1:1 implementation of Monday API (they have it universal), this is more client focused (as you do not want to iterate over columns, boards and look for correct board_id and column_id and follow with update to it, you want to update column for that pulse)
 
@@ -31,6 +31,8 @@ AccessErrorException - Your api key or your rights are not good enough
 NotImplemented - Method not implemented yet (contributions will help)  
 ColumnNotFound - Column for given pulse not found  
 PulseNotFound - Pulse not found  
+OverLimit - your request is either too complex, or you exceeded your limit
+UnknownError - Unknown error, see error message
 
 Status:
 - [X] Get Pulse  
