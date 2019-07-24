@@ -1,34 +1,79 @@
-import requests
+from graphqlclient import GraphQLClient
+import json
+import time
 from .pulse import Pulse
 from .board import Board
 from .exceptions import *
 
+client = GraphQLClient('https://api.monday.com/v2')
+
 class Monday(object):
-	monday_url = "https://api.monday.com:443/v1/"
-	api_key = "api_key="
-	api_key_end="?"+api_key
+	api_key = ""
+	prod_board_id = 0
 	boards = {}
 	pulses = {}
+	client= None
 
-	def __init__(self,api_key):
-		self.api_key="api_key="+str(api_key)
-		self.api_key_end="?"+self.api_key
+	def __init__(self, api_key):
+		self.api_key=api_key
+		self.client = GraphQLClient('https://api.monday.com/v2')
+		self.client.inject_token(api_key)
+
+	def query(self,ql,no=0):
+		result = self.client.execute(ql)
+		x = lambda:None
+		x.__dict__ = json.loads(result)
+		try:
+			return x.data
+		except AttributeError:
+			# this could happen if we have either too complex query, or exceeded timeframe, try again with second delay
+			if "exceeds max complexity" in x.errors[0]['message']:
+				if (no==1):
+					raise OverLimit("Error: "+str(x.errors[0]['message']))
+				time.sleep(1)
+				try:
+					self.query(ql,1)
+				except OverLimit:
+					raise OverLimit("Error: "+str(x.errors[0]['message']))
+			else:
+				raise UnknownError("Error: "+str(x.errors[0]['message'])+" on ql "+ql)
+		except Exception as ex:
+			raise UnknownError("Error: "+str(x.errors[0]['message'])+" on ql "+ql)
+
+
+	def SetBoard(self,board_id):
+		self.prod_board_id=board_id
+
+	def GetAllPulse(self):
+		ql = "{boards(ids: "+str(prod_board_id)+") {groups {id name}}}"
+		p = lambda:None
+		groups = ""
+		return_data = []
+		result = self.client.execute(ql)
+		p.__dict__ = json.loads(result)
+		for i in p.data['boards'][0]['groups']:
+			if "sprint" in i['title'].lower:
+				groups=groups+'"'+str(i['id'])+'",'
+		groups=groups[:-1]+"]"
+		ql = "{boards(ids: "+str(prod_board_id)+") {groups (ids: "+groups+"){items {id}}}}"
+		result = self.client.execute(ql)
+		x = lambda:None
+		x.__dict__ = json.loads(result)
+		for i in x.data['boards'][0]['groups']:
+				for a in i['items']:
+					return_data.append(a['id'])
+		return return_data
 
 	def GetPulse(self,id):
 		try:
 			value = self.pulses[id]
 			return value
 		except KeyError:
-			#print("pulse: "+str(id)+" not in cache :/")
-			# Key is not present
-			#url = "https://api.monday.com:443/v1/pulses/"+str(id)+".json?api_key=..."
-			url = self.monday_url+"/pulses/"+str(id)+self.api_key_end
-			#print(url)
-			r = requests.get(url)
-			if r.status_code != 200:
-				raise AccessErrorException("Status code: "+str(r.status_code)+ " for url: "+url)
-			data = r.json()
-			pulse = Pulse(data['id'],data['name'],data['board_id'],data['url'])
+			ql = "{items(ids:"+str(id)+"){id name board {id}}}"
+			result = self.client.execute(ql)
+			x = lambda:None
+			x.__dict__ = json.loads(result)
+			pulse = Pulse(x.data['items'][0]['id'],x.data['items'][0]['name'],x.data['items'][0]['board']['id'])
 			for i in self.GetBoardColumns(pulse.board_id):
 				value = self.GetPulseColValue(pulse, i['id'], i['type'])
 #				print("pulse.AddColumn("+str(i['id'])+", "+i['title']+", "+i['type']+","+str(value)+")")
@@ -37,35 +82,34 @@ class Monday(object):
 			return pulse
 
 	def GetPulseColValue(self, pulse, column_id, column_type):
-		# https://api.monday.com:443/v1/boards/board_id/columns/numbers0/value.json?pulse_id=pulse_id&return_as_array=true&api_key=...
-		url = self.monday_url+"/boards/"+str(pulse.board_id)+"/columns/"+column_id+"/value.json?pulse_id="+str(pulse.id)+"&return_as_array=false&"+self.api_key
-		#print(url)
-		r = requests.get(url)
-		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code)+ " for url: "+url)
-		data = r.json()
+		# returns json value
+		ql = '{items(ids:'+pulse.id+'){column_values(ids: "'+column_id+'"){value}}}'
+#		print(ql)
+		result = self.query(ql)
+#		print(result['items'])
+		data = lambda:None
+		if ( result['items'][0]['column_values'][0]['value'] is None):
+			return None
+		data = json.loads(result['items'][0]['column_values'][0]['value'])
 		# lets see what we got
 		if column_type=="link":
 			try:
-				return data['value'].get('url')
+				return data['url']
 			except:
-				return data['value']
+				return result['items'][0]['column_values'][0]['value']
+		if column_type=="email":
+			try:
+				return data['email']
+			except:
+				return result['items'][0]['column_values'][0]['value']
 		if column_type=="color":
 			try:
-				return data['value'].get('index')
+				return data['index']
 			except:
-				return data['value']
-		return data['value']
-
-	def GetBoard(self, id):
-		# https://api.monday.com:443/v1/boards/board_id.json?api_key=...
-		raise NotImplemented("Not implemented")
-		board=Board(id,name)
-		return (board)
+				return result['items'][0]['column_values'][0]['value']
+		return data
 
 	def PutColumnValue(self, pulse, column_name, value):
-		# TODO: verification of column
-		# https://api.monday.com:443/v1/boards/board_id/columns/column_id/column_type.json?api_key=...
 		# did board change?
 		testPulse = self.GetPulse(pulse.id)
 		if testPulse.board_id != pulse.board_id:
@@ -75,24 +119,27 @@ class Monday(object):
 			test = pulse.GetColumn(column_name)
 		except ColumnNotFound:
 			raise ColumnNotFound("Column "+column_name+" not found")
+		json_value = json.dumps('"'+str(value)+'"')
+		if (pulse.columns[column_name]['type'] == "link"):
+			json_value=json.dumps(json.dumps({'url': value, 'text': value}))
+		if (pulse.columns[column_name]['type'] == "color"):
+			json_value=json.dumps(json.dumps({'label': value}))
+		if (pulse.columns[column_name]['type'] == "email"):
+			json_value=json.dumps(json.dumps({'email': value, 'text': value}))
+		ql='mutation {change_column_value(item_id:'+pulse.id+', column_id:"'+pulse.columns[column_name]['id']+'",board_id:'+pulse.board_id+',value:'+json_value+') {id}} '
+#		print(ql)
+		self.query(ql)
 
-		url = self.monday_url+"boards/"+str(pulse.board_id)+pulse.columns[column_name]['url']+self.api_key_end
-		data={'pulse_id':pulse.id, 'value': value}
-		#print(url)
-		#print(data)
-		r = requests.put(url, data)
-		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code)+" url: "+url)
-
-	def GetBoardColumns(self,board_id,archived=False):
-		if archived:
-			url = self.monday_url+"/boards/"+str(board_id)+"/columns.json?all_columns=true&"+self.api_key
-		else:
-			url = self.monday_url+"/boards/"+str(board_id)+"/columns.json?all_columns=false&"+self.api_key
-		#print(url)
-		r = requests.get(url)
-		if r.status_code != 200:
-			raise AccessErrorException("Status code: "+str(r.status_code)+" "+url)
-		data = r.json()
-		return data
+	def GetBoardColumns(self,board_id):
+		ql = "{boards(ids: "+str(board_id)+"){columns{id title type}}}"
+		result = self.client.execute(ql)
+		x = lambda:None
+		x.__dict__ = json.loads(result)
+		columns = []
+		for i in x.data['boards'][0]['columns']:
+			if i['id']=="name":
+				continue
+			else:
+				columns.append(i)
+		return columns
 

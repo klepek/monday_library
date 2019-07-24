@@ -12,3 +12,9 @@ class PulseNotFound(Exception):
 
 class PaymentRequired(Exception):
 	pass
+
+class OverLimit(Exception):
+	pass
+
+class UnknownError(Exception):
+	pass

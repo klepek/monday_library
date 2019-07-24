@@ -5,10 +5,9 @@ class Pulse:
 	columns = {}
 	columnsId = {}
 
-	def __init__(self,id, name, board_id, url):
+	def __init__(self,id, name, board_id):
 		self.id=id
 		self.name=name
-		self.url=url
 		self.board_id=board_id
 
 	def AddColumn(self, column_id, column_name, column_type, value):
@@ -16,14 +15,12 @@ class Pulse:
 				'id': column_id,
 				'name': column_name,
 				'type': column_type,
-				'url': "/columns/"+str(column_id)+"/"+column_type+".json",
 				'value':value,
 				}
 		self.columnsId[column_id] = {
 			'id': column_id,
 			'name': column_name,
 			'type': column_type,
-			'url': "/columns/"+str(column_id)+"/"+column_type+".json",
 			'value':value,
 		}
 
