@@ -41,25 +41,21 @@ class Monday(object):
 			raise UnknownError("Error: "+str(x.errors[0]['message'])+" on ql "+ql)
 
 
-	def SetBoard(self,board_id):
-		self.prod_board_id=board_id
-
-	def GetAllPulse(self):
-		ql = "{boards(ids: "+str(prod_board_id)+") {groups {id name}}}"
-		p = lambda:None
-		groups = ""
+	def GetAllPulse(self, board_id = None):
+		if board_id is None:
+			raise UnknownError("Missing board id")
+		prod_board_id = board_id
+		ql = "{boards(ids: "+str(prod_board_id)+") {groups {id title}}}"
+		groups = "["
 		return_data = []
-		result = self.client.execute(ql)
-		p.__dict__ = json.loads(result)
-		for i in p.data['boards'][0]['groups']:
-			if "sprint" in i['title'].lower:
+		p = self.query(ql)
+		for i in p['boards'][0]['groups']:
+			if "sprint" in str(i['title']).lower():
 				groups=groups+'"'+str(i['id'])+'",'
 		groups=groups[:-1]+"]"
 		ql = "{boards(ids: "+str(prod_board_id)+") {groups (ids: "+groups+"){items {id}}}}"
-		result = self.client.execute(ql)
-		x = lambda:None
-		x.__dict__ = json.loads(result)
-		for i in x.data['boards'][0]['groups']:
+		x = self.query(ql)
+		for i in x['boards'][0]['groups']:
 				for a in i['items']:
 					return_data.append(a['id'])
 		return return_data
