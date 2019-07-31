@@ -41,7 +41,7 @@ class Monday(object):
 			raise UnknownError("Error: "+str(x.errors[0]['message'])+" on ql "+ql)
 
 
-	def GetAllPulse(self, board_id = None):
+	def GetAllPulse(self, board_id = None, groupFilter = None):
 		if board_id is None:
 			raise UnknownError("Missing board id")
 		prod_board_id = board_id
@@ -50,7 +50,10 @@ class Monday(object):
 		return_data = []
 		p = self.query(ql)
 		for i in p['boards'][0]['groups']:
-			if "sprint" in str(i['title']).lower():
+			if groupFilter is not None:
+				if groupFilter in str(i['title']).lower():
+					groups=groups+'"'+str(i['id'])+'",'
+			else:
 				groups=groups+'"'+str(i['id'])+'",'
 		groups=groups[:-1]+"]"
 		ql = "{boards(ids: "+str(prod_board_id)+") {groups (ids: "+groups+"){items {id}}}}"
