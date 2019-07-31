@@ -88,9 +88,14 @@ class Monday(object):
 		result = self.query(ql)
 #		print(result['items'])
 		data = lambda:None
-		if ( result['items'][0]['column_values'][0]['value'] is None):
-			return None
-		data = json.loads(result['items'][0]['column_values'][0]['value'])
+		if not result['items'][0]['column_values']:
+			return ""
+		try:
+			if ( result['items'][0]['column_values'][0]['value'] is None):
+				return None
+			data = json.loads(result['items'][0]['column_values'][0]['value'])
+		except Exception:
+			print(str(column_id)+" "+str(column_type))
 		# lets see what we got
 		if column_type=="link":
 			try:
