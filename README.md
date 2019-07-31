@@ -38,9 +38,9 @@ OverLimit - your request is either too complex, or you exceeded your limit
 UnknownError - Unknown error, see error message
 
 Status:
-- [X] Get Pulse  
-- [X] Get Pulse columns  
-- [X] Update column for given pulse  
-- [ ] Make better library  
+- [X] Get Pulse
+- [X] Get Pulse columns
+- [X] Update column for given pulse
+- [ ] Make better library
 - [ ] Write documentation
-- [ ] Write tests  
+- [ ] Write tests
