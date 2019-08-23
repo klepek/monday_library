@@ -1,5 +1,6 @@
-Monday.com (formerly DaPulse) library for Python
+# Monday.com (formerly DaPulse) library for Python
 
+## About
 Api is described here: https://monday.com/developers/v2
 NOTE: v1 api can be found in branch v1_api
 
@@ -13,7 +14,11 @@ This is not 1:1 implementation of Monday API (they have it universal), this is m
 
 Code may be ugly (and probably is, but is working for me).
 
-Typical usage:
+## requirements:
+python3
+
+pip install GraphQLClient
+## Typical usage:
 
 ```python
 from monday_library import Monday as M
@@ -37,7 +42,7 @@ PulseNotFound - Pulse not found
 OverLimit - your request is either too complex, or you exceeded your limit
 UnknownError - Unknown error, see error message
 
-Status:
+## Status:
 - [X] Get Pulse
 - [X] Get Pulse columns
 - [X] Update column for given pulse
